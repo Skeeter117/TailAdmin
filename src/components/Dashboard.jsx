@@ -122,8 +122,8 @@ export default function Dashboard() {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
         <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-700 border-t-blue-500"></div>
-          <p className="text-slate-400">Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#1e293b] border-t-[#3b82f6]"></div>
+          <p className="text-[#94a3b8]">Loading dashboard...</p>
         </div>
       </div>
     )
@@ -150,36 +150,32 @@ export default function Dashboard() {
         <div className="kpi-card card-hover cursor-pointer" onClick={() => navigate('/assets')}>
           <div className="kpi-label">Total Assets</div>
           <div className="kpi-value">{stats.totalAssets}</div>
-          <div className="flex items-center space-x-2 text-slate-400 text-sm">
-            <span>🏗️</span>
-            <span>All managed assets</span>
+          <div className="kpi-subtitle">
+            All managed assets
           </div>
         </div>
 
         <div className="kpi-card card-hover">
           <div className="kpi-label">PM Services Due</div>
-          <div className="kpi-value text-amber-400">{stats.pmDue}</div>
-          <div className="flex items-center space-x-2 text-slate-400 text-sm">
-            <span>📅</span>
-            <span>Within 30 days</span>
+          <div className="kpi-value text-[#f59e0b]">{stats.pmDue}</div>
+          <div className="kpi-subtitle">
+            Within 30 days
           </div>
         </div>
 
         <div className="kpi-card card-hover cursor-pointer" onClick={() => isAdmin() && navigate('/work-orders')}>
           <div className="kpi-label">Work Orders</div>
-          <div className="kpi-value text-blue-400">{stats.openWorkOrders}</div>
-          <div className="flex items-center space-x-2 text-slate-400 text-sm">
-            <span>🔧</span>
-            <span>Active & pending</span>
+          <div className="kpi-value text-[#60a5fa]">{stats.openWorkOrders}</div>
+          <div className="kpi-subtitle">
+            Active & pending
           </div>
         </div>
 
         <div className="kpi-card card-hover cursor-pointer" onClick={() => navigate('/pending-approvals')}>
           <div className="kpi-label">Pending Approvals</div>
-          <div className="kpi-value text-red-400">{stats.pendingApprovals}</div>
-          <div className="flex items-center space-x-2 text-slate-400 text-sm">
-            <span>✓</span>
-            <span>Awaiting response</span>
+          <div className="kpi-value text-[#ef4444]">{stats.pendingApprovals}</div>
+          <div className="kpi-subtitle">
+            Awaiting response
           </div>
         </div>
       </div>

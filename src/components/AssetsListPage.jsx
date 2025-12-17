@@ -78,8 +78,8 @@ export default function AssetsListPage() {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
         <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-700 border-t-blue-500"></div>
-          <p className="text-slate-400">Loading assets...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#1e293b] border-t-[#3b82f6]"></div>
+          <p className="text-[#94a3b8]">Loading assets...</p>
         </div>
       </div>
     )
@@ -98,7 +98,7 @@ export default function AssetsListPage() {
               onClick={handleExportCSV}
               className="btn btn-secondary"
             >
-              📥 Export CSV
+              Export CSV
             </button>
             {canEdit() && (
               <button
@@ -168,19 +168,13 @@ export default function AssetsListPage() {
                   filteredAssets.map((asset) => (
                     <tr key={asset.id}>
                       <td>
-                        <div className="font-semibold text-slate-100">{asset.asset_number}</div>
+                        <div className="font-semibold">{asset.asset_number}</div>
                       </td>
                       <td>
-                        <div className="flex items-center space-x-2">
-                          <span>🏗️</span>
-                          <span>{asset.asset_types?.name}</span>
-                        </div>
+                        <div>{asset.asset_types?.name}</div>
                       </td>
                       <td>
-                        <div className="flex items-center space-x-2">
-                          <span>📍</span>
-                          <span>{asset.location}</span>
-                        </div>
+                        <div>{asset.location}</div>
                       </td>
                       <td>
                         <span
@@ -198,7 +192,7 @@ export default function AssetsListPage() {
                       <td>
                         <button
                           onClick={() => navigate(`/asset/${asset.id}`)}
-                          className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                          className="text-[#60a5fa] hover:text-[#3b82f6] font-medium transition-colors"
                         >
                           View Details →
                         </button>
