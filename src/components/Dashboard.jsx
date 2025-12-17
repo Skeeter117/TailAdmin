@@ -1,18 +1,24 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 import PMSummaryStatus from './PMSummaryStatus'
 import AnnualSchedule from './AnnualSchedule'
-import AssetsList from './AssetsList'
 
 export default function Dashboard() {
+  const navigate = useNavigate()
+  const { isAdmin } = useAuth()
+  const [stats, setStats] = useState({
+    totalAssets: 0,
+    pmDue: 0,
+    openWorkOrders: 0,
+    pendingApprovals: 0
+  })
   const [pmSummaries, setPmSummaries] = useState([])
   const [assetTypes, setAssetTypes] = useState([])
-  const [assets, setAssets] = useState([])
   const [schedules, setSchedules] = useState([])
   const [pendingRepairCounts, setPendingRepairCounts] = useState({})
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterType, setFilterType] = useState('all')
   const [currentYear, setCurrentYear] = useState(2026)
 
   useEffect(() => {
@@ -28,25 +34,42 @@ export default function Dashboard() {
         { data: summariesData },
         { data: assetsData },
         { data: schedulesData },
-        { data: workOrdersData }
+        { data: workOrdersData },
+        { data: pendingApprovalsData }
       ] = await Promise.all([
         supabase.from('asset_types').select('*').order('name'),
         supabase.from('pm_summary').select('*, asset_types(name)'),
-        supabase.from('assets').select('*, asset_types(name)').order('asset_number'),
+        supabase.from('assets').select('id'),
         supabase.from('pm_schedules').select('*').eq('year', currentYear),
-        supabase.from('work_orders').select('*, assets(asset_type_id)').eq('status', 'Pending Approval')
+        supabase.from('work_orders').select('id, status').in('status', ['Pending Approval', 'Approved']),
+        supabase.from('work_orders').select('*, assets(asset_type_id)').eq('requires_customer_approval', true).eq('customer_approval_status', 'pending')
       ])
 
       setAssetTypes(typesData || [])
       setPmSummaries(summariesData || [])
-      setAssets(assetsData || [])
       setSchedules(schedulesData || [])
 
       const counts = {}
       typesData.forEach(type => {
-        counts[type.id] = workOrdersData?.filter(wo => wo.assets?.asset_type_id === type.id).length || 0
+        counts[type.id] = pendingApprovalsData?.filter(wo => wo.assets?.asset_type_id === type.id).length || 0
       })
       setPendingRepairCounts(counts)
+
+      const pmDueCount = summariesData?.filter(s => {
+        if (!s.next_service_due) return false
+        const dueDate = new Date(s.next_service_due)
+        const today = new Date()
+        const thirtyDaysFromNow = new Date()
+        thirtyDaysFromNow.setDate(today.getDate() + 30)
+        return dueDate <= thirtyDaysFromNow
+      }).length || 0
+
+      setStats({
+        totalAssets: assetsData?.length || 0,
+        pmDue: pmDueCount,
+        openWorkOrders: workOrdersData?.length || 0,
+        pendingApprovals: pendingApprovalsData?.length || 0
+      })
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -95,46 +118,69 @@ export default function Dashboard() {
     }
   }
 
-  const filteredAssets = assets.filter(asset => {
-    const matchesSearch =
-      asset.asset_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.location.toLowerCase().includes(searchTerm.toLowerCase())
-
-    const matchesType = filterType === 'all' || asset.asset_types?.name === filterType
-
-    return matchesSearch && matchesType
-  })
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-700 border-t-blue-500"></div>
+          <p className="text-slate-400">Loading dashboard...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">PM Dashboard</h1>
-        <div className="flex gap-4">
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="page-header">Maintenance Dashboard</h1>
+          <p className="page-subtitle">Facility Overview & Schedules</p>
+        </div>
+        {isAdmin() && (
+          <button
+            onClick={() => navigate('/assets')}
+            className="btn btn-primary"
           >
-            <option value="all">All Asset Types</option>
-            {assetTypes.map(type => (
-              <option key={type.id} value={type.name}>{type.name}</option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder="Search assets..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-          />
+            + Add Asset
+          </button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="kpi-card card-hover cursor-pointer" onClick={() => navigate('/assets')}>
+          <div className="kpi-label">Total Assets</div>
+          <div className="kpi-value">{stats.totalAssets}</div>
+          <div className="flex items-center space-x-2 text-slate-400 text-sm">
+            <span>🏗️</span>
+            <span>All managed assets</span>
+          </div>
+        </div>
+
+        <div className="kpi-card card-hover">
+          <div className="kpi-label">PM Services Due</div>
+          <div className="kpi-value text-amber-400">{stats.pmDue}</div>
+          <div className="flex items-center space-x-2 text-slate-400 text-sm">
+            <span>📅</span>
+            <span>Within 30 days</span>
+          </div>
+        </div>
+
+        <div className="kpi-card card-hover cursor-pointer" onClick={() => isAdmin() && navigate('/work-orders')}>
+          <div className="kpi-label">Work Orders</div>
+          <div className="kpi-value text-blue-400">{stats.openWorkOrders}</div>
+          <div className="flex items-center space-x-2 text-slate-400 text-sm">
+            <span>🔧</span>
+            <span>Active & pending</span>
+          </div>
+        </div>
+
+        <div className="kpi-card card-hover cursor-pointer" onClick={() => navigate('/pending-approvals')}>
+          <div className="kpi-label">Pending Approvals</div>
+          <div className="kpi-value text-red-400">{stats.pendingApprovals}</div>
+          <div className="flex items-center space-x-2 text-slate-400 text-sm">
+            <span>✓</span>
+            <span>Awaiting response</span>
+          </div>
         </div>
       </div>
 
@@ -151,11 +197,6 @@ export default function Dashboard() {
         currentYear={currentYear}
         onUpdateSchedule={handleUpdateSchedule}
         onYearChange={setCurrentYear}
-      />
-
-      <AssetsList
-        assets={filteredAssets}
-        onRefresh={fetchData}
       />
     </div>
   )

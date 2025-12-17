@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 
 export default function PMSummaryStatus({ summaries, assetTypes, pendingRepairCounts, onUpdate }) {
   const { canEdit } = useAuth()
+
   const handleDateChange = (id, value) => {
     onUpdate(id, 'next_service_due', value)
   }
@@ -19,65 +20,53 @@ export default function PMSummaryStatus({ summaries, assetTypes, pendingRepairCo
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900">PM Summary Status</h2>
+    <div className="card">
+      <div className="px-6 py-4 border-b border-slate-700/50">
+        <h2 className="section-header mb-0">PM Summary Status</h2>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50">
+      <div className="table-container">
+        <table className="table">
+          <thead>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Asset Type
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Service Frequency
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Total Units Serviced
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Compliance %
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Next Service Due
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Repairs Pending
-              </th>
+              <th>Asset Type</th>
+              <th>Service Frequency</th>
+              <th>Total Units Serviced</th>
+              <th>Compliance %</th>
+              <th>Next Service Due</th>
+              <th>Pending Repairs</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody>
             {summaries.map((summary) => {
               const pendingCount = pendingRepairCounts[summary.asset_type_id] || 0
               return (
-                <tr key={summary.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
+                <tr key={summary.id}>
+                  <td>
+                    <div className="font-semibold text-slate-100">
                       {summary.asset_types?.name}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td>
                     {canEdit() ? (
                       <select
                         value={summary.service_frequency}
                         onChange={(e) => handleFrequencyChange(summary.id, e.target.value)}
-                        className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="input py-1.5 text-sm"
                       >
                         <option value="Monthly">Monthly</option>
                         <option value="Quarterly">Quarterly</option>
                         <option value="Annually">Annually</option>
                       </select>
                     ) : (
-                      <div className="text-sm text-gray-900">{summary.service_frequency}</div>
+                      <div>{summary.service_frequency}</div>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{summary.total_units_serviced}</div>
+                  <td>
+                    <div>{summary.total_units_serviced}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td>
                     {canEdit() ? (
-                      <>
+                      <div className="flex items-center space-x-1">
                         <input
                           type="number"
                           min="0"
@@ -85,43 +74,42 @@ export default function PMSummaryStatus({ summaries, assetTypes, pendingRepairCo
                           step="0.01"
                           value={summary.compliance_percentage}
                           onChange={(e) => handleComplianceChange(summary.id, e.target.value)}
-                          className="w-20 text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="input w-20 py-1.5 text-sm"
                         />
-                        <span className="ml-1 text-sm text-gray-500">%</span>
-                      </>
+                        <span className="text-slate-400">%</span>
+                      </div>
                     ) : (
-                      <div className="text-sm text-gray-900">{summary.compliance_percentage}%</div>
+                      <div>
+                        <span className={`badge ${
+                          summary.compliance_percentage >= 90 ? 'badge-success' :
+                          summary.compliance_percentage >= 70 ? 'badge-warning' :
+                          'badge-error'
+                        }`}>
+                          {summary.compliance_percentage}%
+                        </span>
+                      </div>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td>
                     {canEdit() ? (
                       <input
                         type="date"
                         value={summary.next_service_due || ''}
                         onChange={(e) => handleDateChange(summary.id, e.target.value)}
-                        className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="input py-1.5 text-sm"
                       />
                     ) : (
-                      <div className="text-sm text-gray-900">
+                      <div>
                         {summary.next_service_due ? format(new Date(summary.next_service_due), 'MM/dd/yyyy') : '-'}
                       </div>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                          pendingCount > 0
-                            ? 'bg-error-100 text-error-800'
-                            : 'bg-success-100 text-success-800'
-                        }`}
-                      >
-                        {pendingCount}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {pendingCount === 1 ? 'approval' : 'approvals'}
-                      </span>
-                    </div>
+                  <td>
+                    <span className={`badge ${
+                      pendingCount > 0 ? 'badge-error' : 'badge-success'
+                    }`}>
+                      {pendingCount} {pendingCount === 1 ? 'repair' : 'repairs'}
+                    </span>
                   </td>
                 </tr>
               )

@@ -26,63 +26,75 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-2xl shadow-xl">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">PRS Industrial</h1>
-          <p className="mt-2 text-sm text-gray-600">Customer Portal</p>
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center space-x-3 mb-4">
+            <span className="text-4xl">🏭</span>
+            <h1 className="text-4xl font-bold text-slate-100">PRS Industrial</h1>
+          </div>
+          <p className="text-slate-400 text-lg">Maintenance Portal</p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="you@example.com"
-              />
+        <div className="card p-8">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="input"
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="input"
+                  placeholder="Enter your password"
+                />
+              </div>
             </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="Password"
-              />
-            </div>
-          </div>
 
-          {error && (
-            <div className="text-sm p-3 rounded-lg bg-error-50 text-error-800">
-              {error}
-            </div>
-          )}
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-sm text-red-400">
+                {error}
+              </div>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? 'Loading...' : 'Sign In'}
-          </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary w-full py-3 text-base"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2" />
+                  Signing in...
+                </span>
+              ) : (
+                'Sign In'
+              )}
+            </button>
+          </form>
+        </div>
 
-          <p className="text-center text-xs text-gray-500 mt-4">
-            Authorized users only. Contact PRS Industrial for access.
-          </p>
-        </form>
+        <p className="text-center text-sm text-slate-500 mt-6">
+          Authorized users only. Contact PRS Industrial for access.
+        </p>
       </div>
     </div>
   )
