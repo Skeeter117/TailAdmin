@@ -1,3 +1,5 @@
+import { useAuth } from '../contexts/AuthContext'
+
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
@@ -13,6 +15,7 @@ const STATUS_COLORS = {
 }
 
 export default function AnnualSchedule({ assetTypes, schedules, currentYear, onUpdateSchedule, onYearChange }) {
+  const { canEdit } = useAuth()
   const getScheduleStatus = (assetTypeId, month) => {
     const schedule = schedules.find(
       s => s.asset_type_id === assetTypeId && s.month === month + 1 && s.year === currentYear
@@ -81,16 +84,25 @@ export default function AnnualSchedule({ assetTypes, schedules, currentYear, onU
                   const status = getScheduleStatus(assetType.id, monthIndex)
                   return (
                     <td key={month} className="px-2 py-4">
-                      <button
-                        onClick={() => handleStatusClick(assetType.id, monthIndex)}
-                        className={`w-full px-2 py-1.5 rounded-lg text-xs font-medium border transition-all hover:shadow-md ${STATUS_COLORS[status]}`}
-                        title={`Click to change status (Current: ${status})`}
-                      >
-                        {status === 'Completed' && '✓'}
-                        {status === 'Scheduled' && '○'}
-                        {status === 'Customer Delayed' && '⊗'}
-                        {status === 'In Progress' && '◐'}
-                      </button>
+                      {canEdit() ? (
+                        <button
+                          onClick={() => handleStatusClick(assetType.id, monthIndex)}
+                          className={`w-full px-2 py-1.5 rounded-lg text-xs font-medium border transition-all hover:shadow-md ${STATUS_COLORS[status]}`}
+                          title={`Click to change status (Current: ${status})`}
+                        >
+                          {status === 'Completed' && '✓'}
+                          {status === 'Scheduled' && '○'}
+                          {status === 'Customer Delayed' && '⊗'}
+                          {status === 'In Progress' && '◐'}
+                        </button>
+                      ) : (
+                        <div className={`w-full px-2 py-1.5 rounded-lg text-xs font-medium border text-center ${STATUS_COLORS[status]}`}>
+                          {status === 'Completed' && '✓'}
+                          {status === 'Scheduled' && '○'}
+                          {status === 'Customer Delayed' && '⊗'}
+                          {status === 'In Progress' && '◐'}
+                        </div>
+                      )}
                     </td>
                   )
                 })}

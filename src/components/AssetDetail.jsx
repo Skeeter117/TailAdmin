@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { format } from 'date-fns'
+import { useAuth } from '../contexts/AuthContext'
 import AddWorkOrderModal from './AddWorkOrderModal'
 import FileUpload from './FileUpload'
 
 export default function AssetDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { canEdit, canApproveRepairs } = useAuth()
   const [asset, setAsset] = useState(null)
   const [workOrders, setWorkOrders] = useState([])
   const [attachments, setAttachments] = useState([])
@@ -128,20 +130,22 @@ export default function AssetDetail() {
                 </p>
               </div>
             </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setIsUploadOpen(true)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Upload File
-              </button>
-              <button
-                onClick={() => setIsAddWorkOrderOpen(true)}
-                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
-              >
-                Add Work Order
-              </button>
-            </div>
+            {canEdit() && (
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsUploadOpen(true)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Upload File
+                </button>
+                <button
+                  onClick={() => setIsAddWorkOrderOpen(true)}
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+                >
+                  Add Work Order
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -177,20 +181,22 @@ export default function AssetDetail() {
                           <span>Created: {format(new Date(wo.created_at), 'MM/dd/yyyy')}</span>
                         </div>
                       </div>
-                      <div className="flex gap-2 ml-4">
-                        <button
-                          onClick={() => handleUpdateWorkOrderStatus(wo.id, 'Approved')}
-                          className="px-3 py-1.5 text-xs font-medium text-white bg-success-600 rounded hover:bg-success-700 transition-colors"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleUpdateWorkOrderStatus(wo.id, 'Declined')}
-                          className="px-3 py-1.5 text-xs font-medium text-white bg-error-600 rounded hover:bg-error-700 transition-colors"
-                        >
-                          Decline
-                        </button>
-                      </div>
+                      {canApproveRepairs() && (
+                        <div className="flex gap-2 ml-4">
+                          <button
+                            onClick={() => handleUpdateWorkOrderStatus(wo.id, 'Approved')}
+                            className="px-3 py-1.5 text-xs font-medium text-white bg-success-600 rounded hover:bg-success-700 transition-colors"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleUpdateWorkOrderStatus(wo.id, 'Declined')}
+                            className="px-3 py-1.5 text-xs font-medium text-white bg-error-600 rounded hover:bg-error-700 transition-colors"
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

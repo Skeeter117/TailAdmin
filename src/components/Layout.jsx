@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function Layout({ children }) {
   const navigate = useNavigate()
+  const { userProfile } = useAuth()
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -22,12 +24,20 @@ export default function Layout({ children }) {
                 PRS Industrial Inc.
               </button>
             </div>
-            <button
-              onClick={handleSignOut}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              Sign Out
-            </button>
+            <div className="flex items-center gap-4">
+              {userProfile && (
+                <div className="text-sm">
+                  <div className="font-medium text-gray-900">{userProfile.full_name}</div>
+                  <div className="text-xs text-gray-500">{userProfile.organization}</div>
+                </div>
+              )}
+              <button
+                onClick={handleSignOut}
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
         </div>
       </nav>

@@ -1,6 +1,8 @@
 import { format } from 'date-fns'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function PMSummaryStatus({ summaries, assetTypes, pendingRepairCounts, onUpdate }) {
+  const { canEdit } = useAuth()
   const handleDateChange = (id, value) => {
     onUpdate(id, 'next_service_due', value)
   }
@@ -56,38 +58,54 @@ export default function PMSummaryStatus({ summaries, assetTypes, pendingRepairCo
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <select
-                      value={summary.service_frequency}
-                      onChange={(e) => handleFrequencyChange(summary.id, e.target.value)}
-                      className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    >
-                      <option value="Monthly">Monthly</option>
-                      <option value="Quarterly">Quarterly</option>
-                      <option value="Annually">Annually</option>
-                    </select>
+                    {canEdit() ? (
+                      <select
+                        value={summary.service_frequency}
+                        onChange={(e) => handleFrequencyChange(summary.id, e.target.value)}
+                        className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      >
+                        <option value="Monthly">Monthly</option>
+                        <option value="Quarterly">Quarterly</option>
+                        <option value="Annually">Annually</option>
+                      </select>
+                    ) : (
+                      <div className="text-sm text-gray-900">{summary.service_frequency}</div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{summary.total_units_serviced}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      value={summary.compliance_percentage}
-                      onChange={(e) => handleComplianceChange(summary.id, e.target.value)}
-                      className="w-20 text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    />
-                    <span className="ml-1 text-sm text-gray-500">%</span>
+                    {canEdit() ? (
+                      <>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={summary.compliance_percentage}
+                          onChange={(e) => handleComplianceChange(summary.id, e.target.value)}
+                          className="w-20 text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                        <span className="ml-1 text-sm text-gray-500">%</span>
+                      </>
+                    ) : (
+                      <div className="text-sm text-gray-900">{summary.compliance_percentage}%</div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="date"
-                      value={summary.next_service_due || ''}
-                      onChange={(e) => handleDateChange(summary.id, e.target.value)}
-                      className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    />
+                    {canEdit() ? (
+                      <input
+                        type="date"
+                        value={summary.next_service_due || ''}
+                        onChange={(e) => handleDateChange(summary.id, e.target.value)}
+                        className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    ) : (
+                      <div className="text-sm text-gray-900">
+                        {summary.next_service_due ? format(new Date(summary.next_service_due), 'MM/dd/yyyy') : '-'}
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">

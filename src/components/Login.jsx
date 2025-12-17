@@ -6,7 +6,6 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [isSignUp, setIsSignUp] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -14,21 +13,11 @@ export default function Login() {
     setError('')
 
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        })
-        if (error) throw error
-        setError('Account created successfully. Please sign in.')
-        setIsSignUp(false)
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
-        if (error) throw error
-      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (error) throw error
     } catch (error) {
       setError(error.message)
     } finally {
@@ -77,7 +66,7 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className={`text-sm p-3 rounded-lg ${error.includes('successfully') ? 'bg-success-50 text-success-800' : 'bg-error-50 text-error-800'}`}>
+            <div className="text-sm p-3 rounded-lg bg-error-50 text-error-800">
               {error}
             </div>
           )}
@@ -87,21 +76,12 @@ export default function Login() {
             disabled={loading}
             className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
+            {loading ? 'Loading...' : 'Sign In'}
           </button>
 
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsSignUp(!isSignUp)
-                setError('')
-              }}
-              className="text-sm text-primary-600 hover:text-primary-700"
-            >
-              {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-            </button>
-          </div>
+          <p className="text-center text-xs text-gray-500 mt-4">
+            Authorized users only. Contact PRS Industrial for access.
+          </p>
         </form>
       </div>
     </div>

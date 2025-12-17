@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 import AddAssetModal from './AddAssetModal'
 
 export default function AssetsList({ assets, onRefresh }) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const navigate = useNavigate()
+  const { canEdit } = useAuth()
 
   const handleExportCSV = () => {
     const headers = ['Asset Number', 'Asset Type', 'Location', 'Status']
@@ -42,12 +44,14 @@ export default function AssetsList({ assets, onRefresh }) {
             >
               Export CSV
             </button>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Add Asset
-            </button>
+            {canEdit() && (
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                Add Asset
+              </button>
+            )}
           </div>
         </div>
         <div className="overflow-x-auto">
